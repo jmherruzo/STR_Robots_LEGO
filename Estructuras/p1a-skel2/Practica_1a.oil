@@ -1,0 +1,61 @@
+#include "implementation.oil"
+
+CPU ATMEL_AT91SAM7S256 // CPU del Lego NXT
+{
+	OS LEJOS_OSEK
+  	{
+    	STATUS = EXTENDED;
+    	STARTUPHOOK = FALSE;
+    	ERRORHOOK = FALSE;
+    	SHUTDOWNHOOK = FALSE;
+    	PRETASKHOOK = FALSE;
+    	POSTTASKHOOK = FALSE;
+    	USEGETSERVICEID = FALSE;
+    	USEPARAMETERACCESS = FALSE;
+    	USERESSCHEDULER = FALSE;
+  	};
+
+  APPMODE sample_appmode1{}; // Modo de aplicacion por defecto.
+
+  COUNTER Contador
+  {
+	MINCYCLE	= ??;
+	MAXALLOWEDVALUE	= ??;
+	TICKSPERBASE	= ??;
+  };
+
+  ALARM Alarma1
+  {
+	COUNTER		= Contador;
+	ACTION		= ACTIVATETASK {
+	    TASK 	= Final;
+	};
+	AUTOSTART	= TRUE {
+	    ALARMTIME 	= ??;
+	    CYCLETIME	= ??;
+	    APPMODE	= sample_appmode1;
+	};
+  };
+
+  TASK Avance
+  {
+    	AUTOSTART = TRUE
+		{
+    		APPMODE = sample_appmode1;
+    	};
+    	PRIORITY 	= ??;
+    	ACTIVATION 	= ??;
+    	SCHEDULE 	= ??;
+    	STACKSIZE 	= 512;
+  	};
+   
+   TASK Final
+   {
+    	AUTOSTART	= FALSE;
+        PRIORITY 	= ??;
+        ACTIVATION 	= ??;
+        SCHEDULE 	= ??;
+        STACKSIZE 	= 512;
+   };   
+};
+
