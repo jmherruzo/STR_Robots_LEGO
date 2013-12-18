@@ -6,5 +6,5 @@ TOPPERS_OSEK_OIL_SOURCE := ./practica1a.oil
 
 O_PATH ?= build
 
-include ~/LEGO/nxtOSEK/ecrobot/ecrobot.mak
+include ~/nxtOSEK/ecrobot/ecrobot.mak
 
