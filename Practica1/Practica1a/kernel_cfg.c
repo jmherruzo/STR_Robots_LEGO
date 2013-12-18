@@ -1,6 +1,6 @@
 /*
  *  kernel_cfg.c
- *  Wed Dec 18 08:43:33 2013
+ *  Wed Dec 18 18:24:06 2013
  *  SG Version 2.00
  *  sg ./practica1a.oil -os=ECC2 -I/home/jmherruzo/LEGO/nxtOSEK/ecrobot/../toppers_osek/sg/impl_oil -template=/home/jmherruzo/LEGO/nxtOSEK/ecrobot/../toppers_osek/sg/lego_nxt.sgt
  */
@@ -14,11 +14,11 @@
 #define __STK_UNIT VP
 #define __TCOUNT_STK_UNIT(sz) (((sz) + sizeof(__STK_UNIT) - 1) / sizeof(__STK_UNIT))
 
-#define TNUM_ALARM     0
-#define TNUM_COUNTER   0
+#define TNUM_ALARM     1
+#define TNUM_COUNTER   1
 #define TNUM_ISR2      0
 #define TNUM_RESOURCE  0
-#define TNUM_TASK      2
+#define TNUM_TASK      3
 #define TNUM_EXTTASK   0
 
 const UINT8 tnum_alarm    = TNUM_ALARM;
@@ -33,21 +33,24 @@ const UINT8 tnum_exttask  = TNUM_EXTTASK;
  /****** Object TASK ******/
 
 const TaskType Avance = 0;
-const TaskType Final = 1;
+const TaskType Correccion = 1;
+const TaskType Final = 2;
 
 extern void TASKNAME( Avance )( void );
+extern void TASKNAME( Correccion )( void );
 extern void TASKNAME( Final )( void );
 
 static __STK_UNIT _stack_Avance[__TCOUNT_STK_UNIT(512)];
+static __STK_UNIT _stack_Correccion[__TCOUNT_STK_UNIT(512)];
 static __STK_UNIT _stack_Final[__TCOUNT_STK_UNIT(512)];
 
-const Priority tinib_inipri[TNUM_TASK] = { TPRI_MINTASK + 1, TPRI_MINTASK + 1, };
-const Priority tinib_exepri[TNUM_TASK] = { TPRI_MINTASK + 1, TPRI_MINTASK + 1, };
-const UINT8 tinib_maxact[TNUM_TASK] = { (1) - 1, (1) - 1, };
-const AppModeType tinib_autoact[TNUM_TASK] = { 0x00000001, 0x00000000, };
-const FP tinib_task[TNUM_TASK] = { TASKNAME( Avance ), TASKNAME( Final ), };
-const __STK_UNIT tinib_stk[TNUM_TASK] = { (__STK_UNIT)_stack_Avance, (__STK_UNIT)_stack_Final, };
-const UINT16 tinib_stksz[TNUM_TASK] = { 512, 512, };
+const Priority tinib_inipri[TNUM_TASK] = { TPRI_MINTASK + 1, TPRI_MINTASK + 2, TPRI_MINTASK + 3, };
+const Priority tinib_exepri[TNUM_TASK] = { TPRI_MINTASK + 1, TPRI_MINTASK + 2, TPRI_MINTASK + 3, };
+const UINT8 tinib_maxact[TNUM_TASK] = { (1) - 1, (1) - 1, (1) - 1, };
+const AppModeType tinib_autoact[TNUM_TASK] = { 0x00000001, 0x00000000, 0x00000000, };
+const FP tinib_task[TNUM_TASK] = { TASKNAME( Avance ), TASKNAME( Correccion ), TASKNAME( Final ), };
+const __STK_UNIT tinib_stk[TNUM_TASK] = { (__STK_UNIT)_stack_Avance, (__STK_UNIT)_stack_Correccion, (__STK_UNIT)_stack_Final, };
+const UINT16 tinib_stksz[TNUM_TASK] = { 512, 512, 512, };
 
 TaskType tcb_next[TNUM_TASK];
 UINT8 tcb_tstat[TNUM_TASK];
@@ -60,28 +63,35 @@ DEFINE_CTXB(TNUM_TASK);
 
  /****** Object COUNTER ******/
 
+const CounterType Contador = 0;
 
-const TickType cntinib_maxval[TNUM_COUNTER+1] = { 0};
-const TickType cntinib_maxval2[TNUM_COUNTER+1] = { 0};
-const TickType cntinib_tickbase[TNUM_COUNTER+1] = { 0};
-const TickType cntinib_mincyc[TNUM_COUNTER+1] = { 0};
+const TickType cntinib_maxval[TNUM_COUNTER] = { 10000, };
+const TickType cntinib_maxval2[TNUM_COUNTER] = { 20001, };
+const TickType cntinib_tickbase[TNUM_COUNTER] = { 1, };
+const TickType cntinib_mincyc[TNUM_COUNTER] = { 1, };
 
-AlarmType cntcb_almque[TNUM_COUNTER+1];
-TickType cntcb_curval[TNUM_COUNTER+1];
+AlarmType cntcb_almque[TNUM_COUNTER];
+TickType cntcb_curval[TNUM_COUNTER];
 
  /****** Object ALARM ******/
 
+const AlarmType Alarma1 = 0;
 
-const CounterType alminib_cntid[TNUM_ALARM+1] = { 0};
-const FP alminib_cback[TNUM_ALARM+1] = { (FP)NULL};
-const AppModeType alminib_autosta[TNUM_ALARM+1] = { 0};
-const TickType alminib_almval[TNUM_ALARM+1] = { 0};
-const TickType alminib_cycle[TNUM_ALARM+1] = { 0};
+DeclareTask(Correccion);
+static void _activate_alarm_Alarma1( void );
+static void _activate_alarm_Alarma1( void )
+{ (void)ActivateTask( Correccion ); }
 
-AlarmType almcb_next[TNUM_ALARM+1];
-AlarmType almcb_prev[TNUM_ALARM+1];
-TickType almcb_almval[TNUM_ALARM+1];
-TickType almcb_cycle[TNUM_ALARM+1];
+const CounterType alminib_cntid[TNUM_ALARM] = { 0, };
+const FP alminib_cback[TNUM_ALARM] = { _activate_alarm_Alarma1, };
+const AppModeType alminib_autosta[TNUM_ALARM] = { 0x00000001, };
+const TickType alminib_almval[TNUM_ALARM] = { 200, };
+const TickType alminib_cycle[TNUM_ALARM] = { 300, };
+
+AlarmType almcb_next[TNUM_ALARM];
+AlarmType almcb_prev[TNUM_ALARM];
+TickType almcb_almval[TNUM_ALARM];
+TickType almcb_cycle[TNUM_ALARM];
 
  /****** Object RESOURCE ******/
 
@@ -108,6 +118,7 @@ ResourceType isrcb_lastres[TNUM_ISR2+1];
 
 void object_initialize( void )
 {
+	alarm_initialize();
 	task_initialize();
 }
 

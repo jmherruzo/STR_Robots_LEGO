@@ -1,4 +1,4 @@
 echo Executing NeXTTool to upload helloworld_OSEK.rxe...
-sudo ~/LEGO/NeXTTool /COM=usb -download=helloworld_OSEK.rxe
-sudo ~/LEGO/NeXTTool /COM=usb -listfiles=helloworld_OSEK.rxe
+sudo ~/LEGO/NeXTTool /COM=usb -download=*.rxe
+sudo ~/LEGO/NeXTTool /COM=usb -listfiles=*.rxe
 echo NeXTTool is terminated.

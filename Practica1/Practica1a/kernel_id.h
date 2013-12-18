@@ -1,6 +1,6 @@
 /*
  *  kernel_id.h
- *  Wed Dec 18 08:43:33 2013
+ *  Wed Dec 18 18:24:06 2013
  *  SG Version 2.00
  *  sg ./practica1a.oil -os=ECC2 -I/home/jmherruzo/LEGO/nxtOSEK/ecrobot/../toppers_osek/sg/impl_oil -template=/home/jmherruzo/LEGO/nxtOSEK/ecrobot/../toppers_osek/sg/lego_nxt.sgt
  */
