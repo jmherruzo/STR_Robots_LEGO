@@ -1,0 +1,4 @@
+echo Executing NeXTTool to upload the file.rxe...
+sudo ~/LEGO/NeXTTool /COM=usb -download=Practica_1c.rxe
+sudo ~/LEGO/NeXTTool /COM=usb -listfiles=Practica_1c.rxe
+echo NeXTTool is terminated.
