@@ -6,7 +6,6 @@
 /*--------------------------------------------------------------------------*/
 /* OSEK declarations                                                        */
 /*--------------------------------------------------------------------------*/
-DeclareTask(Retroceso);
 DeclareTask(Avance);
 DeclareTask(Avance2);
 DeclareTask(GiroIzq);
@@ -27,32 +26,16 @@ int time;
 int speedB = 73;
 int speedC = 75;
 
-/*--------------------------------------------------------------------------*/
-/* Task information:                                                        */
-/* -----------------                                                        */
-/* Name    : Retroceso                                                      */
-/* Priority: ??                                                             */
-/* Typ     : EXTENDED TASK                                                  */
-/* Schedule: ??		                                                    */
-/* Objective: Activate servomotors backward, taking into acount calibration.*/
-/*--------------------------------------------------------------------------*/
-TASK(Retroceso)
-{
-
-   // Activar servomotores para avanzar en linea recta
-
-   // Terminar la tarea actual
-  TerminateTask();
-}
 
 /*--------------------------------------------------------------------------*/
 /* Task information:                                                        */
 /* -----------------                                                        */
 /* Name    : Avance                                                         */
-/* Priority: ??                                                             */
+/* Priority: 1                                                             */
 /* Typ     : EXTENDED TASK                                                  */
-/* Schedule: ??		                                                    */
-/* Objective: Activate servomotors forward, taking into acount calibration. */
+/* Schedule: FULL		                                          */
+/* Objective: Avanza un tiempo determinado hacia delante y despues gira     */
+/* a la izquierda								*/
 /*--------------------------------------------------------------------------*/
 TASK(Avance)
 {    
@@ -83,10 +66,10 @@ TASK(Avance)
 /* Task information:                                                        */
 /* -----------------                                                        */
 /* Name    : Avance                                                         */
-/* Priority: ??                                                             */
+/* Priority: 1                                                             */
 /* Typ     : EXTENDED TASK                                                  */
-/* Schedule: ??		                                                    */
-/* Objective: Activate servomotors forward, taking into acount calibration. */
+/* Schedule: FULL		                                                    */
+/* Objective: Avanza hacia delante y después activa el giro derecha         */
 /*--------------------------------------------------------------------------*/
 TASK(Avance2)
 {    
@@ -121,11 +104,10 @@ TASK(Avance2)
 /* Task information:                                                        */
 /* -----------------                                                        */
 /* Name    : GiroIzq                                                        */
-/* Priority: ??                                                             */
+/* Priority: 1                                                              */
 /* Typ     : EXTENDED TASK                                                  */
-/* Schedule: ??		                                                    */
-/* Objective: Activate servomotors to make a left corner, taking into       */ 
-/*            acount calibration.	    				    */
+/* Schedule: FULL		                                           */
+/* Objective: Gira 90º a la izquierda       				 */
 /*--------------------------------------------------------------------------*/
 TASK(GiroIzq)
 {
@@ -159,11 +141,10 @@ TASK(GiroIzq)
 /* Task information:                                                        */
 /* -----------------                                                        */
 /* Name    : GiroDer                                                        */
-/* Priority: ??                                                             */
+/* Priority:  1                                                             */
 /* Typ     : EXTENDED TASK                                                  */
-/* Schedule: ??		                                                    */
-/* Objective: Activate servomotors to make a right corner, taking into      */ 
-/*            acount calibration.	    				    */
+/* Schedule: FULL                                                           */
+/* Objective: Gira 90º a la derecha	    				 */
 /*--------------------------------------------------------------------------*/
 TASK(GiroDer)
 {
@@ -191,45 +172,22 @@ TASK(GiroDer)
     TerminateTask();
 }
 
-/*--------------------------------------------------------------------------*/
-/* Task information:                                                        */
-/* -----------------                                                        */
-/* Name    : Final                                                          */
-/* Priority: ??                                                             */
-/* Typ     : EXTENDED TASK                                                  */
-/* Schedule: ??		                                                    */
-/* Objective: Stop servomotors						    */
-/*--------------------------------------------------------------------------*/
-TASK(Final)
-{
-    // Parar motores
-
-    // Terminar la tarea actual
-  TerminateTask();
-}
 
 /*--------------------------------------------------------------------------*/
 /* Task information:                                                        */
 /* -----------------                                                        */
 /* Name    : Principal                                                      */
-/* Priority: ??                                                             */
+/* Priority: 1                                                              */
 /* Typ     : EXTENDED TASK                                                  */
-/* Schedule: ??		                                                    */
-/* Objective: Initialize variables and organize tasks.			    */
+/* Schedule: FULL		                                           */
+/* Objective: Initialize variables and organize tasks.			 */
 /*--------------------------------------------------------------------------*/
 TASK(Principal)
 {
 
-    // Inicializar variables
   time = 1450;
   systick_wait_ms(1000);
   ActivateTask(Avance);
-    // Organizar las tareas
-
-
-    // Esperar que todas finalicen
-
-
-    // Terminar la tarea actual
+ 
   TerminateTask();
 }

@@ -17,16 +17,6 @@ CPU ATMEL_AT91SAM7S256
 
   APPMODE sample_appmode1{};
 
-
-  TASK Retroceso
-  {
-    	AUTOSTART 	= FALSE;
-        PRIORITY 	= 1;
-        ACTIVATION 	= 1;
-        SCHEDULE 	= FULL;
-        STACKSIZE 	= 512;
-  };
-
   TASK Avance
   {
     	AUTOSTART 	= FALSE;
@@ -63,14 +53,6 @@ CPU ATMEL_AT91SAM7S256
         STACKSIZE 	= 512;
    };
    
-   TASK Final
-   {
-    	AUTOSTART 	= FALSE;
-        PRIORITY 	= 1;
-        ACTIVATION 	= 1;
-        SCHEDULE 	= FULL;
-        STACKSIZE 	= 512;
-   };
 
    TASK Principal
    {
