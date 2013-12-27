@@ -4,7 +4,7 @@
 #include "ecrobot_interface.h"
 
 #define UPPER_LIMIT 100
-#define SPEEDB 98
+#define SPEEDB 100
 #define SPEEDC 100
 #define SONAR_PORT NXT_PORT_S1
 #define PULSADOR1_PORT NXT_PORT_S2
@@ -17,6 +17,10 @@ DeclareTask(Avance);
 DeclareTask(Correccion);
 DeclareTask(Retroceso);
 DeclareTask(CambioDir);
+
+DeclareEvent(TouchSensor);
+
+
 
 void ecrobot_device_initialize()
 {
@@ -31,6 +35,7 @@ void ecrobot_device_terminate()
 
 int speedB;
 int speedC;
+int correccionB, correccionC;
 S32 distancia;
 
 
@@ -57,26 +62,19 @@ void user_1ms_isr_type2(){
 /*--------------------------------------------------------------------------*/
 TASK(Avance)
 {     
-     
-    // Activa motores para comprobar si existe desvio en la navegacion
-    nxt_motor_set_speed(NXT_PORT_B, speedB, 1);    
-    nxt_motor_set_speed(NXT_PORT_C, speedC, 1);
-  
-    
+    ClearEvent(TouchSensor);
     // Espera hasta que se agote el time_out
     while(1)
     {
-      systick_wait_ms(200);
-      display_clear(0);
-      display_goto_xy(0,0);
-      display_int(distancia, 5);
-      display_string("\n");
-      display_int(speedB,5);
-      display_int(speedC,5);
+      
 
-      display_update();
-      nxt_motor_set_speed(NXT_PORT_B, speedB, 1);    
-      nxt_motor_set_speed(NXT_PORT_C, speedC, 1);
+      
+      nxt_motor_set_speed(NXT_PORT_B, speedB-correccionB, 1);    
+      nxt_motor_set_speed(NXT_PORT_C, speedC-correccionC, 1);
+      
+      WaitEvent(TouchSensor);
+      ClearEvent(TouchSensor);
+      ActivateTask(Retroceso);
     }
 
     TerminateTask();
@@ -93,52 +91,82 @@ TASK(Avance)
 /*--------------------------------------------------------------------------*/
 
 TASK(Correccion)
-{
+{	
+  
+        display_clear(0);
+      display_goto_xy(0,0);
+      display_int(distancia, 5);
+      display_string("\n");
+      display_int(speedB-correccionB,5);
+      display_int(speedC-correccionC,5);
+      display_string("\n");
+      display_int(ecrobot_get_touch_sensor(PULSADOR1_PORT), 1);
+      
+      display_update();
+  
 	int revB = nxt_motor_get_count(NXT_PORT_B);
 	int revC = nxt_motor_get_count(NXT_PORT_C);
 	
-	
 	//Comprobamos y corregimos la velocidad de los motores
+	
 	if(revB > revC)
 	{
-	  if(speedC<UPPER_LIMIT)
-	    speedC++;
+	  if(correccionC>0)
+	    correccionC--;
 	  else
-	    speedB--;
+	    correccionB++;
 	}
 	else if(revC > revB)
 	{
-	  if(speedB<UPPER_LIMIT)
-	    speedB++;
+	  if(correccionB>0)
+	    correccionB--;
 	  else
-	    speedC--;	  
+	    correccionC++;  
 	}
 	
 	nxt_motor_set_count(NXT_PORT_B,0);
 	nxt_motor_set_count(NXT_PORT_C,0);
 	
 	
-	if(ecrobot_get_touch_sensor(PULSADOR1_PORT)>0)
-	{
-	  ActivateTask(Retroceso);
-	}
+	//Ajustamos la velocidad base en base a la distancia a la pared
 	
 	distancia = ecrobot_get_sonar_sensor(SONAR_PORT);
 	
-	if(distancia < 20 && speedB > 73 && speedB < 85)
+	if(distancia < 25)
 	{
-	  speedB = speedB - 10;
-	  speedC = speedC - 10;
+	  speedB = SPEEDB - 40;
+	  speedC = SPEEDC - 40;
+	  ecrobot_sound_tone(1000, 75, 75);
 	}
-	else if(distancia < 100  && speedB > 90)
+	else if(distancia < 105)
 	{
-	  speedB = speedB - 20;
-	  speedC = speedC - 20;
+	  speedB = SPEEDB - 30;
+	  speedC = SPEEDC - 30;
 	}
+	else
+	{
+	  speedB = SPEEDB;
+	  speedC = SPEEDC;
+	  
+	}
+	
+	
+	if(ecrobot_get_touch_sensor(PULSADOR1_PORT)==1)
+	{
+	  SetEvent(Avance, TouchSensor);
+	}
+	else
+	{
+	  nxt_motor_set_speed(NXT_PORT_B, speedB-correccionB, 1);    
+	  nxt_motor_set_speed(NXT_PORT_C, speedC-correccionC, 1);
+	}
+	
+
 	
 	//Termina la tarea actual
 	TerminateTask();
 }
+
 
 
 /*--------------------------------------------------------------------------*/
@@ -155,22 +183,18 @@ TASK(Retroceso)
 {
     int time_out = systick_get_ms() + 1000 ; //Calculamos ?? segundos
     
-    speedB = -SPEEDB;
-    speedC = -SPEEDC;
+    speedB = SPEEDB;
+    speedC = SPEEDC;
     // Activa motores para comprobar si existe desvio en la navegacion
-    nxt_motor_set_speed(NXT_PORT_B, speedB, 1);    
-    nxt_motor_set_speed(NXT_PORT_C, speedC, 1);
-    
-  
+    nxt_motor_set_speed(NXT_PORT_B, correccionB-speedB, 1);    
+    nxt_motor_set_speed(NXT_PORT_C, correccionC-speedC, 1);
     
     // Espera hasta que se agote el time_out
     while(systick_get_ms()<time_out)
     {
     }
-    speedB = -SPEEDB;
-    speedC = -SPEEDC;
     
-    //ActivateTask(CambioDir);
+    ActivateTask(CambioDir);
     
 
     TerminateTask();
@@ -191,21 +215,30 @@ TASK(CambioDir)
     nxt_motor_set_count(NXT_PORT_B,0);
     nxt_motor_set_count(NXT_PORT_C,0);
   
-    systick_wait_ms(200);
+    nxt_motor_set_speed(NXT_PORT_B, 0, 1);    
+    nxt_motor_set_speed(NXT_PORT_C, 0, 1);
+    
+    systick_wait_ms(500);
     
     // Activar servomotores para realizar un giro a la izquierda
-    nxt_motor_set_speed(NXT_PORT_B, -SPEEDB+15, 1);    
-    nxt_motor_set_speed(NXT_PORT_C, SPEEDC-15, 1);
+    nxt_motor_set_speed(NXT_PORT_B, -75, 1);    
+    nxt_motor_set_speed(NXT_PORT_C, 75, 1);
     
     int revC = nxt_motor_get_count(NXT_PORT_C);    
-    // Espera hasta que se agote el time_out
-    while(revC < 165)
+
+    while(revC < 170)
     {
       revC = nxt_motor_get_count(NXT_PORT_C);
     }
 
     nxt_motor_set_speed(NXT_PORT_B, 0, 1);    
     nxt_motor_set_speed(NXT_PORT_C, 0, 1);    
+    
+    
+    nxt_motor_set_count(NXT_PORT_B,0);
+    nxt_motor_set_count(NXT_PORT_C,0);
+    
+    systick_wait_ms(500);
     
     // Terminar la tarea actual
     TerminateTask();
@@ -222,8 +255,6 @@ TASK(CambioDir)
 /*--------------------------------------------------------------------------*/
 TASK(Principal)
 {
-  speedB = SPEEDB;
-  speedC = SPEEDC;
   systick_wait_ms(1000);
   ActivateTask(Avance);
   TerminateTask();

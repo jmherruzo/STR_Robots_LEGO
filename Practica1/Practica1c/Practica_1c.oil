@@ -33,26 +33,31 @@ CPU ATMEL_AT91SAM7S256
 	    TASK 	= Correccion;
 	};
 	AUTOSTART	= TRUE {
-	    ALARMTIME 	= 200;
-	    CYCLETIME	= 300;
+	    ALARMTIME 	= 10;
+	    CYCLETIME	= 200;
 	    APPMODE	= sample_appmode1;
 	};
+  };
+  
+  EVENT TouchSensor{
+    MASK = AUTO;
   };
   
 
   TASK Avance
   {
     	AUTOSTART 	= FALSE;
-    	PRIORITY 	= 2;
+    	PRIORITY 	= 1;
     	ACTIVATION 	= 1;
     	SCHEDULE 	= FULL;
     	STACKSIZE 	= 512;
+	EVENT = TouchSensor;
   };
   
     TASK Retroceso
   {
     	AUTOSTART 	= FALSE;
-    	PRIORITY 	= 4;
+    	PRIORITY 	= 5;
     	ACTIVATION 	= 1;
     	SCHEDULE 	= FULL;
     	STACKSIZE 	= 512;
@@ -61,7 +66,7 @@ CPU ATMEL_AT91SAM7S256
     TASK CambioDir
   {
     	AUTOSTART 	= FALSE;
-    	PRIORITY 	=4 ;
+    	PRIORITY 	= 6;
     	ACTIVATION 	= 1;
     	SCHEDULE 	= FULL;
     	STACKSIZE 	= 512;
@@ -83,7 +88,7 @@ CPU ATMEL_AT91SAM7S256
 	{
     		APPMODE = sample_appmode1;
     	};
-    	PRIORITY 	= 1;
+    	PRIORITY 	= 2;
     	ACTIVATION 	= 1;
     	SCHEDULE 	= FULL;
     	STACKSIZE 	= 512;
