@@ -34,7 +34,7 @@ CPU ATMEL_AT91SAM7S256
 	};
 	AUTOSTART	= TRUE {
 	    ALARMTIME 	= 10;
-	    CYCLETIME	= 100;
+	    CYCLETIME	= 200;
 	    APPMODE	= sample_appmode1;
 	};
   };
@@ -57,17 +57,16 @@ CPU ATMEL_AT91SAM7S256
 	EVENT = Giro;
   };
   
-  TASK Derecha
+  
+    TASK Derecha
   {
-    
     	AUTOSTART 	= FALSE;
     	PRIORITY 	= 3;
     	ACTIVATION 	= 1;
     	SCHEDULE 	= FULL;
     	STACKSIZE 	= 512;
   };
-  
-  TASK Izquierda
+      TASK Izquierda
   {
     	AUTOSTART 	= FALSE;
     	PRIORITY 	= 3;

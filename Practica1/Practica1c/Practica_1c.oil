@@ -34,7 +34,7 @@ CPU ATMEL_AT91SAM7S256
 	};
 	AUTOSTART	= TRUE {
 	    ALARMTIME 	= 10;
-	    CYCLETIME	= 200;
+	    CYCLETIME	= 100;
 	    APPMODE	= sample_appmode1;
 	};
   };
