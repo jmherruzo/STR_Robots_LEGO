@@ -2,15 +2,20 @@
 #include "kernel.h"
 #include "kernel_id.h"
 #include "ecrobot_interface.h"
+#include <math.h>
 
+#define RADS 57.2957795
+#define RUEDA 17.5
 #define UPPER_LIMIT 100
 #define LIMITE_CERCA 15
 #define LIMITE_LEJOS 18
-#define SPEEDB 48
+#define DIS_MEDIA 17
+#define SPEEDB 49
 #define SPEEDC 50
 #define DIR_DERECHA 0
 #define MAX_CORRECCION 3
 #define DIR_IZQUIERDA 1
+#define DIR_ASDF 2
 #define SONAR_PORT NXT_PORT_S1
 #define PULSADOR1_PORT NXT_PORT_S2
 /*--------------------------------------------------------------------------*/
@@ -21,6 +26,7 @@ DeclareTask(Avance);
 DeclareTask(Correccion);
 DeclareTask(Derecha);
 DeclareTask(Izquierda);
+DeclareTask(Recolocar);
 
 
 DeclareEvent(Giro);
@@ -41,7 +47,9 @@ void ecrobot_device_terminate()
 int speedB;
 int speedC;
 int correccionB=0, correccionC=0;
-S32 distancia, distancia2=14;
+S32 distancia, distancia2=DIS_MEDIA, distancia3=DIS_MEDIA;
+
+int rev, rev2, rev3;
 
 int correccion=-1;
 int direccion=-1;
@@ -85,6 +93,8 @@ TASK(Avance)
 	ActivateTask(Derecha);
       else if(direccion == DIR_IZQUIERDA)
 	ActivateTask(Izquierda);
+      else if(direccion == DIR_ASDF)
+	ActivateTask(Recolocar);
       direccion = -1;
     }
 
@@ -121,12 +131,18 @@ TASK(Correccion)
 	
 	distancia = ecrobot_get_sonar_sensor(SONAR_PORT);
 	distancia=(ecrobot_get_sonar_sensor(SONAR_PORT)+distancia)/2;
+	rev = (nxt_motor_get_count(NXT_PORT_C)+nxt_motor_get_count(NXT_PORT_B))/2;
 	int alejamiento = distancia - distancia2;
 	if(ecrobot_get_touch_sensor(PULSADOR1_PORT)==1)
 	{
 	    direccion = DIR_IZQUIERDA;
 	    SetEvent(Avance, Giro);
-	}else if (distancia>LIMITE_LEJOS || distancia < LIMITE_CERCA || (distancia < LIMITE_LEJOS && alejamiento<0))
+	}else if(distancia<LIMITE_LEJOS && distancia>LIMITE_CERCA && distancia2 > LIMITE_LEJOS && distancia3 > LIMITE_LEJOS)
+	{
+	    direccion = DIR_ASDF;
+	    SetEvent(Avance, Giro);	  	  
+	}	
+	else if (distancia>LIMITE_LEJOS || distancia < LIMITE_CERCA || (distancia < LIMITE_LEJOS && alejamiento<0))
 	{
 	  
 	  if(distancia < LIMITE_CERCA || (distancia < LIMITE_LEJOS && alejamiento<0)) //Corrige hacia fuera
@@ -164,7 +180,10 @@ TASK(Correccion)
 	    SetEvent(Avance, Giro);
 	    
 	  }
+	  distancia3 = distancia2;
 	  distancia2 = distancia;
+	  rev3 = rev2;
+	  rev2 = rev;
 	  nxt_motor_set_speed(NXT_PORT_B, SPEEDB-correccionB, 1);    
 	  nxt_motor_set_speed(NXT_PORT_C, SPEEDC-correccionC, 1);
 	}	
@@ -181,7 +200,49 @@ TASK(Correccion)
 }
 
 
+TASK(Recolocar)
+{
+  int dif = distancia3-distancia;
+  int difRevs = rev-rev3;
+  float dis = ((float)difRevs/360.0)*(float)RUEDA;
+  float angulo = asin(dif/dis);
+  int grados = angulo*RADS;
 
+  nxt_motor_set_speed(NXT_PORT_B, 0, 1);    
+  nxt_motor_set_speed(NXT_PORT_C, 0, 1);
+	  
+  systick_wait_ms(500);
+	  
+  nxt_motor_set_count(NXT_PORT_B,0);
+  nxt_motor_set_count(NXT_PORT_C,0);
+	  
+  // Activar servomotores para realizar un giro a la izquierda
+  nxt_motor_set_speed(NXT_PORT_B, SPEEDB, 1);    
+  nxt_motor_set_speed(NXT_PORT_C, -SPEEDC, 1);
+	  
+
+  int revB = nxt_motor_get_count(NXT_PORT_B);    
+
+  while(revB < (grados*2))
+  {
+    revB = nxt_motor_get_count(NXT_PORT_B);
+  }
+
+  nxt_motor_set_speed(NXT_PORT_B, 0, 1);    
+  nxt_motor_set_speed(NXT_PORT_C, 0, 1);    
+	  
+	  
+  nxt_motor_set_count(NXT_PORT_B,0);
+  nxt_motor_set_count(NXT_PORT_C,0);
+	 
+  distancia3 = DIS_MEDIA;
+  distancia2 = DIS_MEDIA;
+  rev2 = 0;
+  rev3 = 0;
+	  
+    systick_wait_ms(500);
+    TerminateTask();
+}
 
 /*--------------------------------------------------------------------------*/
 /* Task information:                                                        */
@@ -197,7 +258,7 @@ TASK(Derecha)
 {
 
   
-    int time_out = systick_get_ms() + 1200 ; //Calculamos ?? segundos
+    int time_out = systick_get_ms() + 900 ; //Calculamos ?? segundos
 
     while(systick_get_ms()<time_out)
     {
@@ -258,18 +319,32 @@ TASK(Derecha)
 TASK(Izquierda)
 {
   
+    nxt_motor_set_count(NXT_PORT_B,0);
+    nxt_motor_set_count(NXT_PORT_C,0);
+  
     nxt_motor_set_speed(NXT_PORT_B, -SPEEDB, 1);    
     nxt_motor_set_speed(NXT_PORT_C, -SPEEDC, 1);
     
-    int time_out = systick_get_ms() + 500 ; //Calculamos ?? segundos
+    int dist2 = ecrobot_get_sonar_sensor(SONAR_PORT);
+    dist2=(ecrobot_get_sonar_sensor(SONAR_PORT)+distancia)/2;
+    
+    int time_out = systick_get_ms() + 1000 ; //Calculamos ?? segundos
     
     while(systick_get_ms()<time_out)
     {
     }
     
+    //Cálculos para ajustar el giro
+    int countR = -(nxt_motor_get_count(NXT_PORT_B)+nxt_motor_get_count(NXT_PORT_C))/2;
+    int dist = ecrobot_get_sonar_sensor(SONAR_PORT);
+    dist=(ecrobot_get_sonar_sensor(SONAR_PORT)+distancia)/2;
     
-
-  
+    int dif = dist2-dist;
+    float dis = ((float)countR/360.0)*(float)RUEDA;
+    float angulo = asin(dif/dis);
+    int grados = angulo*RADS;
+    
+    
     nxt_motor_set_speed(NXT_PORT_B, 0, 1);    
     nxt_motor_set_speed(NXT_PORT_C, 0, 1);
     
@@ -284,7 +359,7 @@ TASK(Izquierda)
     
     int revB = nxt_motor_get_count(NXT_PORT_B);    
 
-    while(revB < 170)
+    while(revB < (170+grados*2))
     {
       revB = nxt_motor_get_count(NXT_PORT_B);
     }

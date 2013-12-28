@@ -75,6 +75,17 @@ CPU ATMEL_AT91SAM7S256
     	STACKSIZE 	= 512;
   };
   
+  
+  TASK Recolocar
+  {
+    	AUTOSTART 	= FALSE;
+    	PRIORITY 	= 3;
+    	ACTIVATION 	= 1;
+    	SCHEDULE 	= FULL;
+    	STACKSIZE 	= 512;
+  };
+  
+  
   TASK Correccion
   {
     	AUTOSTART 	= FALSE;
