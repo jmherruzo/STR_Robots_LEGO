@@ -24,11 +24,19 @@
 #define SONAR_PORT NXT_PORT_S4
 #define PULSADOR1_PORT NXT_PORT_S1
 
+//Obtiene la distancia a la pared derecha haciendo la media entre 2 mediciones
 int getDistancia();
+//Obtiene los valores de revoluciones medias entre los dos motores
 int getMediumRevs();
+//Corrige hacia la derecha
 void correccionDerecha();
+//Corrige hacia la izquierda
 void correccionIzquierda();
+//Establece la velocidad de los motores
 void setVelocidad(int motorB, int motorC);
+//Reinicia los contadores de los motores
 void resetMotorCounters();
+//Calcula los grados de corrección
 int calcularGradosCorreccion(int difDistancia, int difRevs);
+//Reinicia los valores de revoluciones y distancia antiguos
 void resetOldValues();
