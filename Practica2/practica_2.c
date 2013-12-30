@@ -17,8 +17,8 @@
 #define DIR_IZQUIERDA 1
 #define DIR_REC_DER 2
 #define DIR_REC_IZ 3
-#define SONAR_PORT NXT_PORT_S1
-#define PULSADOR1_PORT NXT_PORT_S2
+#define SONAR_PORT NXT_PORT_S4
+#define PULSADOR1_PORT NXT_PORT_S1
 /*--------------------------------------------------------------------------*/
 /* OSEK declarations                                                        */
 /*--------------------------------------------------------------------------*/
@@ -137,11 +137,15 @@ TASK(Correccion)
 	rev = (nxt_motor_get_count(NXT_PORT_C)+nxt_motor_get_count(NXT_PORT_B))/2;
 	int alejamiento = distancia - distancia2;
 	if(ecrobot_get_touch_sensor(PULSADOR1_PORT)==1)
-	{
+	{ //Correccion alejandose de la pared
+	    correccionB = 0;
+	    correccionC = 0;
 	    direccion = DIR_IZQUIERDA;
 	    SetEvent(Avance, Giro);
 	}else if(distancia<LIMITE_LEJOS && distancia>LIMITE_CERCA && distancia2 > LIMITE_LEJOS && distancia3 > LIMITE_LEJOS)
-	{
+	{ //Correccion Volviendo a la pared
+	    correccionB = 0;
+	    correccionC = 0;
 	    direccion = DIR_REC_IZ;
 	    SetEvent(Avance, Giro);	  	  
 	}	
