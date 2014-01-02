@@ -1,0 +1,51 @@
+U8 bt_receive_buf[32];
+U8 bt_send_buf[32];
+
+TASK(TaskMain) {
+	Bluetooth bt;
+
+	if (bt.getDeviceAddress(address)) // get device address
+	{
+		lcd.putf("sn", "BD_ADDR:");
+		for (SINT i=0; i<7; i++) lcd.putf("x", address[i],2); 
+
+		if (bt.getFriendlyName(name)) { // display the friendly device name
+			lcd.putf("nss", "BD_NAME: ", name);
+
+		}
+
+		lcd.putf("nsn", "Connecting BT...");
+		lcd.disp();
+
+		if (bt.waitForConnection("1234", 0)) { // wait forever
+
+			display_clear(0);
+			display_goto_xy(0, 0);
+			display_string("Conectado")
+			display_update();
+
+			int i=0, aux=0;
+
+      /////////////////////////////////////////
+			//  Recibir datos
+      //  aux = bt.receive(bt_receive_buf, 32);
+      /////////////////////////////////////////
+
+      /////////////////////////////////////////
+			//  if(aux != 0){
+			//  Procesar datos recibidos
+      /////////////////////////////////////////
+      
+			}
+			//Enviar datos
+			bt.send(bt_receive_buf, 32);
+		}
+	}
+
+	else {
+		lcd.putf("sns", "BT Failed." "Restart the NXT.");	
+		lcd.disp();
+		while(1);
+
+	}
+}
