@@ -95,9 +95,14 @@ TASK(Avance)
 int a=0;
 TASK(Correccion)
 {     	
-	if(ecrobot_get_touch_sensor(PULSADOR1_PORT)==1)
+	if(ecrobot_get_touch_sensor(PULSADOR1_PORT)==1&&ref==-1)
 	{//Comprobamos si se ha pulsado el boton frontal
 		ref=ecrobot_get_light_sensor(LIGHT_PORT);
+		systick_wait_ms(500);
+	}
+	else if (ecrobot_get_touch_sensor(PULSADOR1_PORT)==1)
+	{
+		ref=-1;
 		systick_wait_ms(500);
 	}
 	
