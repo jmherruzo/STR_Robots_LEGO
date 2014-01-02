@@ -1,0 +1,68 @@
+#include "implementation.oil"
+
+CPU ATMEL_AT91SAM7S256
+{
+	OS LEJOS_OSEK
+  	{
+    	STATUS = EXTENDED;
+    	STARTUPHOOK = FALSE;
+    	ERRORHOOK = FALSE;
+    	SHUTDOWNHOOK = FALSE;
+    	PRETASKHOOK = FALSE;
+    	POSTTASKHOOK = FALSE;
+    	USEGETSERVICEID = FALSE;
+    	USEPARAMETERACCESS = FALSE;
+    	USERESSCHEDULER = FALSE;
+  	};
+
+  APPMODE sample_appmode1{};
+
+    //Contador para la alarma
+  COUNTER Contador
+  {
+	MINCYCLE	= 1;
+	MAXALLOWEDVALUE	= 10000;
+	TICKSPERBASE	= 1;
+  };
+
+  //Alarma que activará la corrección
+  ALARM Alarma1
+  {
+	COUNTER		= Contador;
+	ACTION		= ACTIVATETASK {
+	    TASK 	= Correccion;
+	};
+	AUTOSTART	= TRUE {
+	    ALARMTIME 	= 10;
+	    CYCLETIME	= 10;
+	    APPMODE	= sample_appmode1;
+	};
+  };
+  
+  
+
+  TASK Avance
+  {
+        	AUTOSTART = TRUE
+	{
+    		APPMODE = sample_appmode1;
+    	};
+    	PRIORITY 	= 1;
+    	ACTIVATION 	= 1;
+    	SCHEDULE 	= FULL;
+    	STACKSIZE 	= 512;
+  };
+  
+  
+  TASK Correccion
+  {
+    	AUTOSTART 	= FALSE;
+    	PRIORITY 	= 2;
+    	ACTIVATION 	= 1;
+    	SCHEDULE 	= FULL;
+    	STACKSIZE 	= 512;
+  };
+
+
+};
+
