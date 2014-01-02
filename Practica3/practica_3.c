@@ -92,7 +92,7 @@ TASK(Avance)
 /* Schedule: FULL		                                                    */
 /* Objective: Corrige movimiento	         				    */
 /*--------------------------------------------------------------------------*/
-
+int a=0;
 TASK(Correccion)
 {     	
 	if(ecrobot_get_touch_sensor(PULSADOR1_PORT)==1)
@@ -109,10 +109,10 @@ TASK(Correccion)
 		velocidad = ((variacion*(MAXSPEED-MINSPEED))/MAXVARIACION)+MINSPEED;
 		if(velocidad>MAXSPEED)
 			velocidad=MAXSPEED;
-		if(ultimaDireccion==ATRAS)
-			velocidad=velocidad+5;
-		if(ultimaDireccion==ADELANTE)
-			velocidad=velocidad-5;
+		if(a<light)
+			velocidad=velocidad*1.2;
+		if(a>light)
+			velocidad=velocidad*0.8;
 		setVelocidad(velocidad, velocidad);
 		ultimaDireccion=ATRAS;
 	}
@@ -122,10 +122,10 @@ TASK(Correccion)
 		velocidad = ((variacion*(MAXSPEED-MINSPEED))/MAXVARIACION)+MINSPEED;
 		if(velocidad>MAXSPEED)
 			velocidad=MAXSPEED;
-		if(ultimaDireccion==ATRAS)
-			velocidad=velocidad-5;
-		if(ultimaDireccion==ADELANTE)
-			velocidad=velocidad+5;
+		if(a>light)
+			velocidad=velocidad*1.2;
+		if(a<light)
+			velocidad=velocidad*0.8;
 		setVelocidad(-velocidad, -velocidad);
 		ultimaDireccion=ADELANTE;
 	}
@@ -134,7 +134,7 @@ TASK(Correccion)
 		setVelocidad(0,0);
 		ultimaDireccion=0;
 	}
-	
+	a=light;
 	TerminateTask();
 }
 
