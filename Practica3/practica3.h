@@ -1,8 +1,8 @@
 //Limite superior de velocidad
 #define UPPER_LIMIT 100
 //Velocidades iniciales de los motores
-#define MAXSPEED 80
-#define MINSPEED 5
+#define MAXSPEED 100
+#define MINSPEED 25
 //Grados de luz
 #define MAXVARIACION 35
 //Puertos usados

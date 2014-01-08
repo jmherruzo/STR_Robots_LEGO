@@ -114,10 +114,10 @@ TASK(Correccion)
 		velocidad = ((variacion*(MAXSPEED-MINSPEED))/MAXVARIACION)+MINSPEED;
 		if(velocidad>MAXSPEED)
 			velocidad=MAXSPEED;
-		if(a<light)
+		/*if(a<light)
 			velocidad=velocidad*1.2;
 		if(a>light)
-			velocidad=velocidad*0.8;
+			velocidad=velocidad*0.8;*/
 		setVelocidad(velocidad, velocidad);
 		ultimaDireccion=ATRAS;
 	}
@@ -127,10 +127,10 @@ TASK(Correccion)
 		velocidad = ((variacion*(MAXSPEED-MINSPEED))/MAXVARIACION)+MINSPEED;
 		if(velocidad>MAXSPEED)
 			velocidad=MAXSPEED;
-		if(a>light)
+		/*if(a>light)
 			velocidad=velocidad*1.2;
 		if(a<light)
-			velocidad=velocidad*0.8;
+			velocidad=velocidad*0.8;*/
 		setVelocidad(-velocidad, -velocidad);
 		ultimaDireccion=ADELANTE;
 	}
@@ -172,3 +172,9 @@ void resetMotorCounters()
 	nxt_motor_set_count(NXT_PORT_B,0);
     nxt_motor_set_count(NXT_PORT_C,0);
 }
+
+void mover(float distancia)
+{
+	resetMotorCounters();
+}
+
