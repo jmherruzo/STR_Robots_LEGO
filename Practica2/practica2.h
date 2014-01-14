@@ -22,7 +22,7 @@
 #define DIR_REC_IZ 3
 //Puertos usados
 #define SONAR_PORT NXT_PORT_S4
-#define PULSADOR1_PORT NXT_PORT_S1
+#define PULSADOR1_PORT NXT_PORT_S12*
 
 //Obtiene la distancia a la pared derecha haciendo la media entre 2 mediciones
 int getDistancia();

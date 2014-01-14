@@ -31,6 +31,8 @@ int ref = -1;
 int light;
 int ultimaDireccion=0;
 int velocidad;
+int auxiliar = 0;
+int auxiliar2 = 0;
 
 /*--------------------------------------------------------------------------*/
 /* Definitions                                                              */
@@ -75,7 +77,9 @@ TASK(Avance)
 			display_string("\nAdelante\n");
 		else if(ultimaDireccion==ATRAS)
 			display_string("\nAtras\n");
-		display_int(velocidad, 3);
+		display_int(velocidad, 4);
+		display_int(auxiliar, 4);
+		display_int(auxiliar2, 4);
 		display_update();
 
     }
@@ -107,36 +111,32 @@ TASK(Correccion)
 	}
 	
 	light = ecrobot_get_light_sensor(LIGHT_PORT);
-	
+	float distancia;
 	if(light>(ref+1) && ref!=-1)
 	{
-		int variacion = light-ref;
+		/*int variacion = light-ref;
 		velocidad = ((variacion*(MAXSPEED-MINSPEED))/MAXVARIACION)+MINSPEED;
 		if(velocidad>MAXSPEED)
 			velocidad=MAXSPEED;
-		/*if(a<light)
-			velocidad=velocidad*1.2;
-		if(a>light)
-			velocidad=velocidad*0.8;*/
-		setVelocidad(velocidad, velocidad);
-		ultimaDireccion=ATRAS;
+		setVelocidad(velocidad, velocidad);*/
+		ultimaDireccion=ADELANTE;
+		distancia = calcularDistancia(light);
+		if(distancia > 0.2 || distancia < -0.2)
+			moverDelante(distancia);
+
 	}
 	else if(light<(ref-1) && ref!=-1)//CAYENDO PA ATRAS
 	{
-		int variacion = ref-light;
+		/*int variacion = ref-light;
 		velocidad = ((variacion*(MAXSPEED-MINSPEED))/MAXVARIACION)+MINSPEED;
 		if(velocidad>MAXSPEED)
 			velocidad=MAXSPEED;
-		/*if(a>light)
-			velocidad=velocidad*1.2;
-		if(a<light)
-			velocidad=velocidad*0.8;*/
-		setVelocidad(-velocidad, -velocidad);
-		ultimaDireccion=ADELANTE;
+		setVelocidad(-velocidad, -velocidad);*/
+		ultimaDireccion=ATRAS;
 	}
 	else
 	{
-		setVelocidad(0,0);
+		//setVelocidad(0,0);
 		ultimaDireccion=0;
 	}
 	a=light;
@@ -163,8 +163,8 @@ int getMediumRevs()
 
 void setVelocidad(int motorB, int motorC)
 {
-    nxt_motor_set_speed(NXT_PORT_B, motorB, 1);    
-    nxt_motor_set_speed(NXT_PORT_C, motorC, 1);  
+    nxt_motor_set_speed(NXT_PORT_B, motorB, 0);    
+    nxt_motor_set_speed(NXT_PORT_C, motorC, 0);  
 }
 
 void resetMotorCounters()
@@ -173,8 +173,20 @@ void resetMotorCounters()
     nxt_motor_set_count(NXT_PORT_C,0);
 }
 
-void mover(float distancia)
+void moverDelante(float distancia)
 {
 	resetMotorCounters();
+	int calcRevs = (int)((distancia/RUEDA)*360);
+	setVelocidad(100, 100);
+	int revsV = getMediumRevs();
+	while(revsV < calcRevs)
+	{
+		revsV = getMediumRevs();
+	}
+	//setVelocidad(0,0);
 }
 
+float calcularDistancia(int lightValue)
+{
+	return ((float)(lightValue-ref))/10.0;
+}

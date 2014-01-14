@@ -10,6 +10,9 @@
 #define PULSADOR1_PORT NXT_PORT_S2
 #define LIGHT_PORT NXT_PORT_S1
 
+//Rueda
+#define RUEDA 25.44
+
 //Direciones
 #define ADELANTE 1
 #define ATRAS 2
@@ -22,3 +25,7 @@ int getMediumRevs();
 void setVelocidad(int motorB, int motorC);
 //Reinicia los contadores de los motores
 void resetMotorCounters();
+//Mueve el robot una distancia dada
+void moverDelante(float distancia);
+//Calcula la distancia que es necesario mover
+float calcularDistancia(int light);
