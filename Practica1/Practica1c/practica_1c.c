@@ -134,14 +134,14 @@ TASK(Correccion)
 	
 	if(distancia < 25)
 	{
-	  speedB = SPEEDB - 40;
-	  speedC = SPEEDC - 40;
-	  ecrobot_sound_tone(1000, 75, 75);
+	  speedB = SPEEDB - 75;
+	  speedC = SPEEDC - 75;
+	  //ecrobot_sound_tone(1000, 75, 75);
 	}
 	else if(distancia < 105)
 	{
-	  speedB = SPEEDB - 30;
-	  speedC = SPEEDC - 30;
+	  speedB = SPEEDB - 50;
+	  speedC = SPEEDC - 50;
 	}
 	else
 	{
@@ -183,8 +183,8 @@ TASK(Retroceso)
 {
     int time_out = systick_get_ms() + 1000 ; //Calculamos ?? segundos
     
-    speedB = SPEEDB;
-    speedC = SPEEDC;
+    speedB = SPEEDB-40;
+    speedC = SPEEDC-40;
     // Activa motores para comprobar si existe desvio en la navegacion
     nxt_motor_set_speed(NXT_PORT_B, correccionB-speedB, 1);    
     nxt_motor_set_speed(NXT_PORT_C, correccionC-speedC, 1);
@@ -226,7 +226,7 @@ TASK(CambioDir)
     
     int revC = nxt_motor_get_count(NXT_PORT_C);    
 
-    while(revC < 160)
+    while(revC < 185)
     {
       revC = nxt_motor_get_count(NXT_PORT_C);
     }

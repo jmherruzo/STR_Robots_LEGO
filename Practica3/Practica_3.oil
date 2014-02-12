@@ -21,8 +21,8 @@ CPU ATMEL_AT91SAM7S256
   COUNTER Contador
   {
 	MINCYCLE	= 1;
-	MAXALLOWEDVALUE	= 10000;
-	TICKSPERBASE	= 1;
+	MAXALLOWEDVALUE	= 1000000;
+	TICKSPERBASE	= 10;
   };
 
   //Alarma que activará la corrección
@@ -33,8 +33,8 @@ CPU ATMEL_AT91SAM7S256
 	    TASK 	= Correccion;
 	};
 	AUTOSTART	= TRUE {
-	    ALARMTIME 	= 10;
-	    CYCLETIME	= 10;
+	    ALARMTIME 	= 1;
+	    CYCLETIME	= 1;
 	    APPMODE	= sample_appmode1;
 	};
   };

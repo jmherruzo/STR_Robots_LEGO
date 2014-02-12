@@ -2,13 +2,17 @@
 #define UPPER_LIMIT 100
 //Velocidades iniciales de los motores
 #define MAXSPEED 100
-#define MINSPEED 25
+#define MINSPEED 80
 //Grados de luz
 #define MAXVARIACION 35
 //Puertos usados
 #define SONAR_PORT NXT_PORT_S4
 #define PULSADOR1_PORT NXT_PORT_S2
 #define LIGHT_PORT NXT_PORT_S1
+#define GYRO_PORT NXT_PORT_S3
+
+#define GYRO_BAJO 15
+#define GYRO_MEDIO 40
 
 //Direciones
 #define ADELANTE 1

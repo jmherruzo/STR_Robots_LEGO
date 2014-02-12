@@ -28,9 +28,12 @@ void ecrobot_device_terminate()
 
 //Variables globales
 int ref = -1;
-int light;
+int light, light_old = 0, gyro;
+int maxDif = 0, counter=0;
 int ultimaDireccion=0;
 int velocidad;
+int gyro_offset = 602;
+
 
 /*--------------------------------------------------------------------------*/
 /* Definitions                                                              */
@@ -58,11 +61,14 @@ TASK(Avance)
 {     
 	ecrobot_set_light_sensor_active(LIGHT_PORT);
 	int aux;
+	int max_gyro=0;
 	setVelocidad(0,0);
     while(1)
     {
 		systick_wait_ms(200);
 		aux = ecrobot_get_light_sensor(LIGHT_PORT);
+		if(gyro>max_gyro)
+			max_gyro = gyro;
 		display_clear(0);
 		display_goto_xy(0,0);
 		display_string("Referencia: ");
@@ -75,9 +81,8 @@ TASK(Avance)
 			display_string("\nAdelante\n");
 		else if(ultimaDireccion==ATRAS)
 			display_string("\nAtras\n");
-		display_int(velocidad, 3);
+		display_int(max_gyro, 4);
 		display_update();
-
     }
 
     TerminateTask();
@@ -92,54 +97,55 @@ TASK(Avance)
 /* Schedule: FULL		                                                    */
 /* Objective: Corrige movimiento	         				    */
 /*--------------------------------------------------------------------------*/
-int a=0;
 TASK(Correccion)
-{     	
-	if(ecrobot_get_touch_sensor(PULSADOR1_PORT)==1&&ref==-1)
-	{//Comprobamos si se ha pulsado el boton frontal
-		ref=ecrobot_get_light_sensor(LIGHT_PORT);
-		systick_wait_ms(500);
-	}
-	else if (ecrobot_get_touch_sensor(PULSADOR1_PORT)==1)
+{
+	int touch = ecrobot_get_touch_sensor(PULSADOR1_PORT);
+	if(ref==-1 && touch==1)
 	{
+		systick_wait_ms(500);
+		ref = ecrobot_get_light_sensor(LIGHT_PORT);
+	}
+	else if(ref!=-1 && touch==1)
+	{
+		systick_wait_ms(500);
 		ref=-1;
-		systick_wait_ms(500);
-	}
-	
-	light = ecrobot_get_light_sensor(LIGHT_PORT);
-	
-	if(light>(ref+1) && ref!=-1)
-	{
-		int variacion = light-ref;
-		velocidad = ((variacion*(MAXSPEED-MINSPEED))/MAXVARIACION)+MINSPEED;
-		if(velocidad>MAXSPEED)
-			velocidad=MAXSPEED;
-		/*if(a<light)
-			velocidad=velocidad*1.2;
-		if(a>light)
-			velocidad=velocidad*0.8;*/
-		setVelocidad(velocidad, velocidad);
-		ultimaDireccion=ATRAS;
-	}
-	else if(light<(ref-1) && ref!=-1)//CAYENDO PA ATRAS
-	{
-		int variacion = ref-light;
-		velocidad = ((variacion*(MAXSPEED-MINSPEED))/MAXVARIACION)+MINSPEED;
-		if(velocidad>MAXSPEED)
-			velocidad=MAXSPEED;
-		/*if(a>light)
-			velocidad=velocidad*1.2;
-		if(a<light)
-			velocidad=velocidad*0.8;*/
-		setVelocidad(-velocidad, -velocidad);
-		ultimaDireccion=ADELANTE;
-	}
-	else
-	{
 		setVelocidad(0,0);
-		ultimaDireccion=0;
+	} else if(ref!=-1)
+	{
+		light = ecrobot_get_light_sensor(LIGHT_PORT);
+		gyro = ecrobot_get_gyro_sensor(GYRO_PORT)-gyro_offset;
+		
+		
+		if(light>(ref+2)) //Inclinado hacia delante
+		{
+			if(gyro>0)
+				velocidad = MAXSPEED;
+			else if(gyro > -GYRO_BAJO)
+				velocidad = MAXSPEED * 0.8;
+			else if(gyro > -GYRO_MEDIO)
+				velocidad = MAXSPEED * 0.6;
+			else 
+				velocidad = 0;
+		}
+		else if(light<(ref-2)) //Inclinado hacia atrás
+		{
+			if(gyro<0)
+				velocidad = -MAXSPEED;
+			else if(gyro < GYRO_BAJO)
+				velocidad = -MAXSPEED * 0.8;
+			else if(gyro < GYRO_MEDIO)
+				velocidad = -MAXSPEED * 0.6;
+			else 
+				velocidad = 0;
+		}
+		else
+			velocidad = 0;
+		
+		setVelocidad(velocidad, velocidad);
+			
 	}
-	a=light;
+	
+	
 	TerminateTask();
 }
 
