@@ -142,7 +142,6 @@ TASK(Correccion)
 			velocidad = 0;
 		
 		setVelocidad(velocidad, velocidad);
-			
 	}
 	
 	
@@ -169,8 +168,8 @@ int getMediumRevs()
 
 void setVelocidad(int motorB, int motorC)
 {
-    nxt_motor_set_speed(NXT_PORT_B, motorB, 1);    
-    nxt_motor_set_speed(NXT_PORT_C, motorC, 1);  
+    nxt_motor_set_speed(NXT_PORT_B, motorB, 0);    
+    nxt_motor_set_speed(NXT_PORT_C, motorC, 0);  
 }
 
 void resetMotorCounters()
@@ -179,8 +178,20 @@ void resetMotorCounters()
     nxt_motor_set_count(NXT_PORT_C,0);
 }
 
-void mover(float distancia)
+void moverDelante(float distancia)
 {
 	resetMotorCounters();
+	int calcRevs = (int)((distancia/RUEDA)*360);
+	setVelocidad(100, 100);
+	int revsV = getMediumRevs();
+	while(revsV < calcRevs)
+	{
+		revsV = getMediumRevs();
+	}
+	//setVelocidad(0,0);
 }
 
+float calcularDistancia(int lightValue)
+{
+	return ((float)(lightValue-ref))/10.0;
+}
